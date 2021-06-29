@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "lauracaroline",
+    "password": "laura789",
+    "database": "caravans",
+    "host": "localhost",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "lauracaroline",
+    "password": "laura789",
+    "database": "caravans",
+    "host": "localhost",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "lauracaroline",
+    "password": "laura789",
+    "database": "caravans",
+    "host": "localhost",
+    "dialect": "mysql"
+  }
+}
