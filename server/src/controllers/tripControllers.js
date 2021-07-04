@@ -1,7 +1,7 @@
 const { Op } = require('sequelize')
 const { parse } = require('date-fns')
 const {getHourDate} = require('../utils/getHourDate')
-const stripe = require('stripe')('sk_test_51J4vDPC7VwF1036sXv1yUe2SC6WTY3kpNLedaXBqXsluHx2MJzuBSvCOdULqnmWwTnjPW6ikKjHLWq0x9xcMrRlU00D0FnYvii');
+const availabilityTrip = require('../services/availabilityTrip')
 const { 
     trips,
     citys,
@@ -9,6 +9,8 @@ const {
     trips_not_includes,
     days_disponibles
 } = require('../databases/models')
+const stripe = require('stripe')('sk_test_51J4vDPC7VwF1036sXv1yUe2SC6WTY3kpNLedaXBqXsluHx2MJzuBSvCOdULqnmWwTnjPW6ikKjHLWq0x9xcMrRlU00D0FnYvii');
+
 class TripControllers {
     async createTrip(request, response) {
         const {
@@ -20,6 +22,8 @@ class TripControllers {
             schedule_initial,
             schedule_end,
         } = request.body
+
+        console.log(request.body)
         
         const parsedIncludes = JSON.parse(request.body.trips_includes)
         const parsedNotIncludes = JSON.parse(request.body.trips_not_includes)
@@ -176,6 +180,8 @@ class TripControllers {
             id_price,
         } = request.body
 
+        console.log(request.body)
+
         const parsedIncludes = JSON.parse(request.body.trips_includes)
         const parsedNotIncludes = JSON.parse(request.body.trips_not_includes)
         const parsedDays = JSON.parse(request.body.days_disponibles)
@@ -184,18 +190,14 @@ class TripControllers {
         try{
             const updateProductStripe = await stripe.products.update(
                 id_product,
-                {
-                    name,
-                    type: 'service'
-                }
+                {name}
             )
 
-            const updatePriceProductStripe = await stripe.prices.update(
-                id_price,
+            const updatePriceProductStripe = await stripe.prices.create(
                 {
                     currency: 'brl',
                     unit_amount: value * 100,
-                    product: productStripe.id
+                    product: updateProductStripe.id
                 }
             )
             const checkExistsThisCity = await citys.findOne({
@@ -283,6 +285,18 @@ class TripControllers {
             return response.status(400).send({error:'Algo deu errado, tente novamente mais tarde!'})
         }
     }
+
+    async availabilityTrips(request, response){
+        const {
+            id,
+            date
+        } = request.params
+
+        const availability = await availabilityTrip({id, date})
+        console.log(availability)
+        return response.status(200).send(availability)
+    }
+
 }
 
 module.exports = new TripControllers()

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
+import {TouchableOpacity} from 'react-native'
+import {useNavigation} from '@react-navigation/native'
 
 import {
     Container,
@@ -8,6 +10,14 @@ import {
 } from './styles'
 export default function ImageSelected({selectedImage, defaultImage}) {
   const [image, setImage] = useState(null);
+  const navigation = useNavigation()
+
+  useEffect(()=>{
+    const unsubscribe = navigation.addListener('blur', ()=>{
+      return setImage(null)
+    })
+    
+  },[navigation])
 
   useEffect(()=>{
     if(defaultImage && !image ){
@@ -34,9 +44,13 @@ export default function ImageSelected({selectedImage, defaultImage}) {
             <ButtonStatus title="Selecione uma imagem" onPress={pickImage} />
         )}
         {image && (
-          <Photo 
-            onPress={pickImage} 
-            source={{ uri: image }}style={{ width: '100%', height: 235 }} />
+          <TouchableOpacity style={{width: '100%'}}onPress={pickImage}>
+            <Photo 
+              onPress={pickImage} 
+              source={{ uri: image }}style={{ width: '100%', height: 235 }} 
+            />
+          </TouchableOpacity>
+          
         )}
     </Container>
   );

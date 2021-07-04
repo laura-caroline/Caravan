@@ -34,18 +34,23 @@ const SignIn = () => {
 
     const submitForm = async (values, setFieldError)=>{
         setLoading(true)
-        const response = await api.post('/user/auth', values)
-        const data = response.data
-        setLoading(false)
-        
-        if(response.status === 200){
-            return handleLogin(data.token,{
-                idUser: data.idUser,
-                User: data.User,
-                hierarchy: data.hierarchy
-            })
+        try{
+            const response = await api.post('/user/auth', values)
+            const data = response.data
+            setLoading(false)
+            
+            if(response.status === 200){
+                return handleLogin(data.token,{
+                    idUser: data.idUser,
+                    User: data.User,
+                    hierarchy: data.hierarchy
+                })
+            }
         }
-        return setFieldError('password', data.error)
+        catch(error){
+            setLoading(false)
+            return setFieldError('password', error.response.data.error)
+        }
     }
 
     return (

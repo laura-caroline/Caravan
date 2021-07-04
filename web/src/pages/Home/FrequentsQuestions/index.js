@@ -11,16 +11,10 @@ const Questions = () => {
        <Container>
            <WrapperQuestions>
                <Question>
-                   <Query q= 'É possivel cancelar a viagem?' res= 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore veniam laudantium inventore doloremque, ipsa vel voluptates nam obcaecati officia totam, necessitatibus ea iusto nulla commodi doloribus aliquam labore nemo magni.'/>
+                   <Query q= 'É possivel cancelar o passeio?' res= 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore veniam laudantium inventore doloremque, ipsa vel voluptates nam obcaecati officia totam, necessitatibus ea iusto nulla commodi doloribus aliquam labore nemo magni.'/>
                </Question>
                <Question>
-                   <Query q= 'Qual a garantia que tenho se perder o voo?' res= 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore veniam laudantium inventore doloremque, ipsa vel voluptates nam obcaecati officia totam, necessitatibus ea iusto nulla commodi doloribus aliquam labore nemo magni.'/>
-               </Question>
-               <Question>
-                    <Query q= 'Qual a principal forma de viagem?' res= 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore veniam laudantium inventore doloremque, ipsa vel voluptates nam obcaecati officia totam, necessitatibus ea iusto nulla commodi doloribus aliquam labore nemo magni.'/>
-               </Question>
-               <Question>
-                    <Query q= 'Qual o melhor desconto de viagem?' res= 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore veniam laudantium inventore doloremque, ipsa vel voluptates nam obcaecati officia totam, necessitatibus ea iusto nulla commodi doloribus aliquam labore nemo magni.'/>
+                    <Query q= 'Qual o melhor desconto para o passeio?' res= 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore veniam laudantium inventore doloremque, ipsa vel voluptates nam obcaecati officia totam, necessitatibus ea iusto nulla commodi doloribus aliquam labore nemo magni.'/>
                </Question>
                <Question>
                     <Query q= 'Vocês dão descontos para grupos grandes?' res= 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore veniam laudantium inventore doloremque, ipsa vel voluptates nam obcaecati officia totam, necessitatibus ea iusto nulla commodi doloribus aliquam labore nemo magni.'/>

@@ -1,21 +1,32 @@
 import React, {useState, useEffect } from 'react'
-import {WrapperForm, Form, Input, WrapperList, LinkList, Error  } from './styles.js'
+import {withRouter} from 'react-router-dom'
+import {FaSearch} from 'react-icons/fa'
+import {
+    BoxContent,
+    BoxPossiblesLocals,
+    Container,
+    ErrorMessage,
+    Input,
+    Form,
+    LinkList,
+    ButtonSearch
+} from './styles'
 
 
-const Search = () => {
-    const [getCountys, setCountys] = useState([])
-    const [getUfs, setUfs] = useState([])
+const Search = ({history}) => {
+    const [citys, setCitys] = useState([])
+    const [ufs, setUfs] = useState([])
     const [valueInput, setValueInput] = useState('')
-    const [responseUfs, setResponseUfs] = useState([])
-    const [responseCountys, setResponseCountys] = useState([])
+    const [possiblesUfs, setPossiblesUfs] = useState([])
+    const [possiblesCitys, setPossiblesCitys] = useState([])
     const [error, setError] = useState('')
+
     const handleChange = (event) => {
         const { value } = event.target
         setError('')
         if (!value) {
-            setResponseUfs([])
-            setResponseCountys([])
-
+            setPossiblesUfs([])
+            setPossiblesCitys([])
         }
         setValueInput(value)
         if (value.length > 3) {
@@ -23,70 +34,98 @@ const Search = () => {
 
             const regexp = new RegExp(`^${value}`, 'i')
 
-            const ufs = getUfs.filter((item) => {
-                return regexp.test(item.nome)
-            })
-            const filterUfs = ufs.map((uf) => {
-                return {sigla: uf.sigla, nome: uf.nome }
-            })
-            const countys = getCountys.filter((county) => {
-                return regexp.test(county.nome)
+            const regexpUfs = ufs.filter((uf) => {
+                return regexp.test(uf.nome)
             })
 
-            const filterCountys = countys.map((county) => {
-                return { nome: county.nome, uf: county.microrregiao.mesorregiao.UF.sigla }
+            const regexpCitys = citys.filter((city) => {
+                return regexp.test(city.nome)
             })
 
-            setResponseUfs(filterUfs)
-            setResponseCountys(filterCountys)
+            const filterPossiblesUfs = regexpUfs.map((uf) => {
+                return {
+                    sigla: uf.sigla, 
+                    nome: uf.nome
+                 }
+            })
+
+            const filterPossiiblesCitys = regexpCitys.map((city) => {
+                return { 
+                    nome: city.nome,
+                    uf: city.microrregiao.mesorregiao.UF.sigla 
+                }
+            })
+
+            setPossiblesUfs(filterPossiblesUfs)
+            setPossiblesCitys(filterPossiiblesCitys)
         }
     }
     
     useEffect(() => {
-        fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
-            .then((res) => res.json()).then((date) => {
-                const filteredUfs = date.map((item)=>{
-                    return {sigla: item.sigla, nome: item.nome}
-                })
-                return setUfs(filteredUfs)
+        (async()=>{
+            const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
+            const data = await response.json()
+            const filteredUfs = data.map((item)=>{
+                return {
+                    sigla: item.sigla, 
+                    nome: item.nome
+                }
             })
+            return setUfs(filteredUfs)
+        })()
     }, [])
-    useEffect(() => {
-        fetch('https://servicodados.ibge.gov.br/api/v1/localidades/municipios')
-            .then((res) => res.json()).then((date) => {
 
-                return setCountys(date)
-            })
+    useEffect(() => {
+        (async()=>{
+            const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/municipios')
+            const data = await response.json()
+            setCitys(data)
+        })()
     }, [])
-    console.log(getUfs)
+
+    const handleSubmit = ()=>{
+        console.log('aq')
+        return history.push(`/trip?q=${valueInput}`)
+    }
+
     return (
-        <WrapperForm>
-            <Form method="get" action={`/trip`}>
-                <div style={{width:'90%', position:'relative'}}>
-                    <Input name="q" value={valueInput} onChange={handleChange}/>
-                    <WrapperList show={error? false : true}>
-                        {responseUfs.length > 0 && responseUfs.map((item)=>{
-                            return <LinkList href={`/trip?uf=${item?.nome}`}>{item.nome}</LinkList>
-                        })}
-                        {responseCountys.length > 0 && responseCountys.map((item,index)=>{
-                            return (
-                                <LinkList href={`/trip?c=${item.nome}`}>
-                                    {item.nome}-{item.uf}
-                                </LinkList>
-                            )
-                        })}
-                </WrapperList>
-                <div>
+        <Container>
+            <Form onSubmit={handleSubmit}>
+            <BoxContent>
+                <div style={{display: 'flex', border: '1px solid black', alignItems: 'center'}}>
+                    <Input 
+                        style={{border: 'none', outline: 0}}
+                        value={valueInput} 
+                        onChange={handleChange}
+                    />
+                    <ButtonSearch onSubmit={handleSubmit}>
+                        <FaSearch size="18"/>
+                    </ButtonSearch>
+                </div>
                 
-                </div>
-                </div>
-               
-               
-            </Form> 
-            <Error>{error}</Error>
-            
-        </WrapperForm>
+                <BoxPossiblesLocals show={error? false : true}>
+                    {possiblesUfs.length > 0 && possiblesUfs.map((uf)=>{
+                        return (
+                            <LinkList href={`/trip?uf=${uf?.nome}`}>
+                                {uf.nome}
+                            </LinkList>
+                        )
+                    })}
+                    {possiblesCitys.length > 0 && possiblesCitys.map((city)=>{
+                        return (
+                            <LinkList href={`/trip?c=${city.nome}`}>
+                                {city.nome}-{city.uf}
+                            </LinkList>
+                        )
+                    })}
+                </BoxPossiblesLocals>
+            </BoxContent>
+            <ErrorMessage>
+                {error}
+            </ErrorMessage>
+            </Form>
+        </Container>
     )
 }
-export default Search
+export default withRouter(Search)
 

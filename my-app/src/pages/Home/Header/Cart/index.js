@@ -4,6 +4,9 @@ import {useNavigation} from '@react-navigation/native'
 import {useCheckOut} from '../../../../context/checkout'
 import {useAuthenticate} from '../../../../context/authenticate'
 import CheckoutStripe from './CheckoutStripe/index'
+import {View, StatusBar} from 'react-native'
+import Spinner from 'react-native-loading-spinner-overlay'
+
 
 import {
     Container,
@@ -15,50 +18,52 @@ import {
     TextNotAuthenticate,
     ButtonNotAuthenticate,
 } from './styles'
+import { ActivityIndicator } from 'react-native'
 const Cart = ()=>{
     const [tripsOfUser, setTripsOfUser] = useState([])
-
+    const [loading, setLoading] = useState(true)
     const {authenticate} = useAuthenticate()
     const {storagedTrips} = useCheckOut()
     const {profile: {idUser}} = useAuthenticate()
     const navigation = useNavigation()
+
     useEffect(()=>{
         if(storagedTrips){
-            console.log(idUser)
             const findoutTripsOfUser = storagedTrips.filter((trip)=>{
                 return trip.id_user === idUser
             })
-            return setTripsOfUser(findoutTripsOfUser)
+            setTripsOfUser(findoutTripsOfUser)
+            setLoading(false)
         }
     },[storagedTrips])
 
     const handleNavigateSignIn = ()=>{
         return navigation.navigate('SignIn')
     }
-
-    const handleNavigateHome = ()=>{
-        return navigation.navigate('Home')
-    }
-
     return(
         (authenticate ? ( 
             (tripsOfUser.length > 0 ? (
                 <Container>
-                    <ItemsCart/>
-                    <BoxPrice>
-                        <Button title="Realizar pagamento" onPress={()=> navigation.navigate('CheckoutStripe', {items: tripsOfUser})}/>
-                    </BoxPrice>
+                    <StatusBar barStyle="dark-content"/>
+                    <Spinner
+                        visible={loading}
+                        textContent="Loading..."
+                        textStyle={{color: '#FFF'}}
+                    />
+                    <View>
+                        <ItemsCart/>
+                        <BoxPrice>
+                            <CheckoutStripe items={tripsOfUser}/>
+                        </BoxPrice>
+                    </View>
+                    
                 </Container>
             ):(
                 <BoxEmptyTrips>
                     <TextEmpty>Não existem itens adicionados</TextEmpty>
-                    <Button 
-                        title="Ir para o inicio"
-                        onPress={handleNavigateHome}
-                    />
                 </BoxEmptyTrips>
             ))
-        ):(
+            ):(
             <BoxNotAuthenticate>
                 <TextNotAuthenticate>
                     Para você ver os items desejados que você selecionou é necessário fazer o login
@@ -69,9 +74,10 @@ const Cart = ()=>{
                 />
             </BoxNotAuthenticate>
         
-          
-        ))
+            
+            ))
         
-    )
+        )
+       
 }
 export default Cart

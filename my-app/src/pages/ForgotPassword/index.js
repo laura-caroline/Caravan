@@ -1,7 +1,10 @@
-import React  from 'react'
+import React, {useEffect, useState} from 'react'
 import api from '../../config/api'
+import {useNavigation} from '@react-navigation/native'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
+import {Alert} from 'react-native'
+import Spinner from 'react-native-loading-spinner-overlay'
 import {
     Container,
     BoxContent,
@@ -15,7 +18,11 @@ import {
 } from '../../components/styles-form'
 
 const ForgotPassword = () => {
-    
+    const [loading, setLoading] = useState(false)
+    const [email, setEmail] = useState('')
+
+    const navigation = useNavigation()
+
     const FormSchema = Yup.object().shape({
         email: Yup
             .string()
@@ -24,40 +31,51 @@ const ForgotPassword = () => {
         ,
     })
 
-    const submitForm = async (values, setFieldError) => {
+    useEffect(()=>{
+        const unsubscribe = navigation.addListener('blur', ()=>{
+            setEmail('')
+        })
+    },[])
+
+    const submitForm = async (values) => {
+        setLoading(true)
         const response = await api.post('user/auth/email', values)
         const data = response.data
 
         if (response.status === 200) {
-            console.log('Quase lá... verifique sua caixa de entrada')
+            setLoading(false)
+            return Alert.alert('Sucess', 'Quase lá... verifique sua caixa de entrada')
         }
-        return setFieldError('email', data.error)
+        setLoading(false)
+        return Alert.alert('Error', data.error)
     }
 
     return (
         <Container>
             <BoxContent>
                 <Content style={{ marginTop: 80 }}>
+                    <Spinner
+                        visible={loading}
+                        textContent="Loading..."
+                        textStyle={{color: '#FFF'}}
+                    />
                     <Formik
                         initialValues={{
-                            email: '',
+                            email,
                         }}
                         validationSchema={FormSchema}
-                        onSubmit={async (values, { setFieldError }) => {
-                            return submitForm(values, setFieldError)
+                        onSubmit={async (values) => {
+                            return await submitForm(values)
                         }}
                     >
-                        {({
-                            handleChange,
-                            handleSubmit,
-                            errors
-                        }) => (
+                        {({handleSubmit,errors}) => (
                         <>
                             <Label>Email:</Label>
                             <Input
+                                value={email}
                                 placeholder="Digite seu email cadastrado"
                                 autoCapitalize="none"
-                                onChangeText={handleChange('email')}
+                                onChangeText={(email)=> setEmail(email)}
                             />
                             <MessageError>
                                 {errors.email && errors.email}
@@ -66,10 +84,8 @@ const ForgotPassword = () => {
                                 title='Enviar'
                                 onPress={handleSubmit}
                             />
-
                         </>
                         )}
-
                     </Formik>
                 </Content>
             </BoxContent>

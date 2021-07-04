@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { MdAccountCircle } from 'react-icons/md'
 import {useAuthenticate} from '../../context/authenticate'
-import Check from '../Home/Header/Cart/CheckoutStripe/index'
 import {
     Container,
     BoxNavigation,
@@ -14,9 +13,8 @@ import {
 
 export const Dashboard = () => {
     const [visible, setVisible] = useState(false)
-    //Contexts
     const {handleLogout, isAdmin, profile:{idUser, User}} = useAuthenticate()
-    //
+
     const handleVisibleModal = () => {
         const isVisible = visible ? false : true
         return setVisible(isVisible)
@@ -34,35 +32,39 @@ export const Dashboard = () => {
                 </Logo>   
             </BoxNavigation>
             <BoxGroupButtons show={visible}>
-                    {!isAdmin ?(
-                        <ListButtons>
-                            <Item>
-                                <Link href={`/user/${User}/meus-passeios`}>
-                                    Minhas viagens
-                                </Link>
-                            </Item>
-                            <Item>
-                                <Link>
-                                    <Check/>
-                                </Link>
-                            </Item> 
-                            <Item onClick={handleLogoutUser}><Link>Sair</Link></Item>
-                        </ListButtons>
-                    ):(
-                        <ListButtons>
-                            <Item>
-                                <Link href={`/user/${User}/passeios`}>
-                                Passeios
-                                </Link>
-                            </Item>  
-                            <Item>
-                                <Link href={`/user/${User}/passeios-vendidos`}>
-                                    Passeios vendidos
-                                </Link>
-                            </Item>
-                            <Item onClick={handleLogoutUser}><Link>Sair</Link></Item>
-                        </ListButtons> 
-                    )}
+            {!isAdmin ?(
+                <ListButtons>
+                    <Item>
+                        <Link href={`/user/${User}/meus-passeios`}>
+                            Minhas viagens
+                        </Link>
+                    </Item>
+                    <Item>
+                        <Link href={'/payment'}>
+                            Meu carrinho
+                        </Link>
+                    </Item> 
+                    <Item onClick={handleLogoutUser}>
+                        <Link>
+                            Sair
+                        </Link>
+                    </Item>
+                </ListButtons>
+            ):(
+                <ListButtons>
+                    <Item>
+                        <Link href={`/user/${User}/passeios`}>
+                        Passeios
+                        </Link>
+                    </Item>  
+                    <Item>
+                        <Link href={`/user/${User}/passeios-vendidos`}>
+                            Passeios vendidos
+                        </Link>
+                    </Item>
+                    <Item onClick={handleLogoutUser}><Link>Sair</Link></Item>
+                </ListButtons> 
+            )}
                     
                 
             </BoxGroupButtons>

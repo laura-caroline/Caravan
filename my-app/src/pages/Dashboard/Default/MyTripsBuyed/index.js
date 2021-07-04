@@ -3,7 +3,8 @@ import {useNavigation} from '@react-navigation/native'
 import api from '../../../../config/api'
 import {useAuthenticate} from '../../../../context/authenticate'
 import {Picker} from '@react-native-picker/picker'
-import {Text} from 'react-native'
+import {Alert, Text} from 'react-native'
+import Spinner from 'react-native-loading-spinner-overlay'
 import {
     Container,
     BoxContent,
@@ -25,6 +26,7 @@ import {
 } from './styles'
 
 const MyTripsBuyed = () => {
+    const [loading, setLoading] = useState(true)
     const [trips, setTrips ] = useState([])
     const {profile: {idUser}} = useAuthenticate()
     // hooks
@@ -34,7 +36,8 @@ const MyTripsBuyed = () => {
         (async ()=>{
             const response = await api.get(`/payment/${idUser}`)
             const data = response.data
-            return setTrips(data)
+            setLoading(false)
+            return setTrips(data)  
         })()
     }, [])
 
@@ -44,20 +47,30 @@ const MyTripsBuyed = () => {
 
     return (
         <BoxContent>
-            <Title>Minhas viagens</Title>
+            <Spinner
+                visible={loading}
+                textContent="Loading..."
+                textStyle={{color: '#FFF'}}
+            />
+
+            <Title>
+                Minhas viagens
+            </Title>
             <Container>
             {trips.length > 0 ? trips.map((item)=>(
                 <BoxTrip>
-                    <Image source={item.payment.trip.image}/>
+                    <Image
+                        source={{uri: item.payment.order.trip.image}}
+                    />
                     <BoxGroupButtons>
-                        <BoxButton>
+                        <BoxButton style={{width: '25%'}}>
                             <Label>Data:</Label>
                             <Input 
-                                value={item.payment.order.date}
+                                value={item.date}
                                 editable={false}
                             />
                         </BoxButton>
-                        <BoxButton>
+                        <BoxButton style={{width: '55%'}}>
                             <Label>Horário:</Label>
                             <Picker 
                                 style={{padding: 5}} 
@@ -68,17 +81,16 @@ const MyTripsBuyed = () => {
                                 />  
                             </Picker>
                         </BoxButton>
-                        <BoxButton>
+                        <BoxButton style={{width: '20%'}}> 
                             <Label>Pessoas:</Label>
                             <Input 
                                 value={item.payment.order.numbers_people}
-                                editable={false}
                             />
                         </BoxButton>
                     </BoxGroupButtons>
                     <Button 
                         title="Saiba mais"
-                        onPress={()=> handleNavigateDetailsTrip(trip.payment.order.id_trip)}
+                        onPress={()=> handleNavigateDetailsTrip(item.payment.order.id_trip)}
                     />
                 </BoxTrip>
                 )):(

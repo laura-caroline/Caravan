@@ -11,7 +11,7 @@ export const CheckOutProvider = ({children})=>{
     useEffect(()=>{
         const getTripsStoraged = localStorage.getItem(key) || []
         const parsedStoragedTrips = getTripsStoraged.length > 0 && JSON.parse(getTripsStoraged)
-        setStoragedTrips(parsedStoragedTrips)
+        return setStoragedTrips(parsedStoragedTrips)
     },[])
     
     const handleAddStoragedTrips = (objTrip)=>{

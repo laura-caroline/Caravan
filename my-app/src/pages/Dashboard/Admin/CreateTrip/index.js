@@ -2,14 +2,13 @@ import React, { useState, useEffect} from 'react'
 import {Picker} from '@react-native-picker/picker'
 import {useNavigation} from '@react-navigation/native'
 import {TextInputMask} from 'react-native-masked-text'
-import {StyleSheet} from 'react-native'
 import api from '../../../../config/api'
 import {useAuthenticate} from '../../../../context/authenticate'
 import {Formik} from 'formik'
 import * as Yup from 'yup'
-import {Text} from 'react-native'
-//** */
-import {parsedTime} from '../../../../utils/parsedTime'
+import {Text, Alert, StyleSheet} from 'react-native'
+import {parsedTime, sumTime} from '../../../../utils/parsedTime'
+import Spinner from 'react-native-loading-spinner-overlay'
 
 import { 
     Container,
@@ -39,17 +38,24 @@ import ImageSelected from '../../../../components/ImagePicker/index'
 const CreateTrip = () => {
     const [loading, setLoading] = useState(false)
     const [ufs, setUfs] = useState([])
-    const [selectedUf, setSelectedUf] = useState('')
     const [citys, setCitys] = useState([])
     const [include, setInclude] = useState('')
     const [notInclude, setNotInclude] = useState('')
-    
+    const [formData, setFormData] = useState({
+        trips_not_includes: [],
+        trips_includes: [],
+        days_disponibles: []
+    })
     const {profile: {User, hierarchy}} = useAuthenticate()
     const navigation = useNavigation()
 
     const FormSchema = Yup.object().shape({
         name: Yup
             .string()
+            .required('Campo obrigatório')
+        ,
+        image: Yup
+            .object()
             .required('Campo obrigatório')
         ,
         uf: Yup
@@ -106,6 +112,15 @@ const CreateTrip = () => {
             .min(1, 'Campo obrigatório')
         ,
     })
+    
+    useEffect(()=>{
+        const unsubscribe = navigation.addListener('blur', ()=>{
+            setFormData({})
+            setInclude('')
+            setNotInclude('')
+        })
+    },[navigation])
+    
     useEffect(() => {
         (async()=>{
             const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
@@ -121,9 +136,9 @@ const CreateTrip = () => {
 
     useEffect(() => {
         (async()=>{
-            if(selectedUf){
+            if(formData.uf){
                 const findoutUf = ufs.find((uf)=>{
-                    return uf.nome == selectedUf
+                    return uf.nome == formData.uf
                 })
                 const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${findoutUf.sigla}/municipios`)
                 const data = await response.json()
@@ -134,11 +149,64 @@ const CreateTrip = () => {
                 return setCitys(ordenedCitys)
             }
         })()        
-    }, [selectedUf])
+    }, [formData.uf])
+
+    const handleChange = (field, value)=>{
+        return setFormData({...formData, [field]: value})
+    }
+    const handleChangeInclude = ()=>{
+        const {trips_includes} = formData
+        setInclude('')
+        return setFormData({
+            ...formData, 
+            trips_includes: [
+                ...formData.trips_includes,
+                {name: include}
+            ]})
+    }
+    const handleChangeNotInclude = ()=>{
+        const {trips_not_includes} = formData
+        setNotInclude('')
+        return setFormData({
+            ...formData, 
+            trips_not_includes: [
+                ...formData.trips_not_includes,
+                {name: notInclude}
+            ]})
+    }
+    const handleChangeDays = (day)=>{
+        const {days_disponibles} = formData
+        return setFormData({
+            ...formData, 
+            days_disponibles: [
+                ...formData.days_disponibles,
+                {day: day}
+            ]
+        })
+    }
+
+    const handleDeleteInclude = ()=>{
+        const {trips_includes} = formData
+        const deleteInclude = trips_includes.filter((item)=>{
+            return item.name != include
+        })
+        return setFormData({...formData, trips_includes: deleteInclude})
     
-    const handleBackPageDashboard = ()=>{
-        return navigation.navigate('Passeios')
-    }   
+    }
+    const handleDeleteNotInclude = ()=>{
+        const {trips_not_includes} = formData
+        const deleteNotInclude = trips_not_includes.filter((item)=>{
+            return item.name != notInclude
+        })
+        return setFormData({...formData, trips_not_includes: deleteNotInclude})
+    }
+    const handleDeleteDay = (day)=>{
+        const {days_disponibles} = formData
+        const deleteDay = days_disponibles.filter((item)=>{
+            return item.day != day
+        })
+        return setFormData({...formData, days_disponibles: deleteDay})
+    }
 
     const submitForm = async (values, setFieldError) => {
         setLoading(true)
@@ -173,48 +241,46 @@ const CreateTrip = () => {
         const data = response.data
 
         if(response.status === 200){
+            setLoading(false)
+            Alert.alert('Success', 'Passeio criado com sucesso!')
             return navigation.navigate('Passeios')
         }
         setLoading(false)
-        return setFieldError('days_disponibles', data.msg)
+        return Alert.alert('Error', data.error)
     }
-
     return (
         <Container>
         <BoxContent>
+            <Spinner
+                visible={loading}
+                textContent="Loading..."
+                textStyle={{color: '#FFF'}}
+            />
             <Title>Adicione suas atrações</Title>
             <BoxForm>
                 <Formik
-                    initialValues={{
-                        image: {},
-                        city: '',
-                        uf: '',
-                        name: '',
-                        duration: '',
-                        value: 0,
-                        schedule_initial: '',
-                        schedule_end: '',
-                        trips_includes: [],
-                        trips_not_includes: [],
-                        days_disponibles: [],
-                    }}
+                    initialValues={formData}
                     validationSchema={FormSchema}
-                    onSubmit={({values, setFieldError}) => {
-                        return submitForm(values, setFieldError)
+                    enableReinitialize
+                    onSubmit={async (values, {setFieldError}) => {
+                        return await submitForm(values, setFieldError)
                     }}
                 >
-                    {({values,handleChange,handleSubmit,errors, setFieldValue })=>(
+                    {({handleSubmit, errors })=>(
+ 
                     <>
-                        <ImageSelected 
-                            selectedImage={(image)=> setFieldValue('image', image)}
+                        <ImageSelected
+                            selectedImage={(image)=> handleChange('image', image)}
                         />
+                    
                         <ErrorMessage>
                             {errors.image && errors.image}
                         </ErrorMessage>
                         <Label>Nome da atração</Label>
                             <Input
+                                value={formData.name}
                                 placeholder="Digite o nome do seu passeio"
-                                onChangeText={handleChange('name')}
+                                onChangeText={(name)=> handleChange('name', name)}
                             />
                             <ErrorMessage>
                                 {errors.name && errors.name}
@@ -223,11 +289,8 @@ const CreateTrip = () => {
                             <Local>
                                 <Picker 
                                     style={{width: '100%'}}
-                                    selectedValue={selectedUf} 
-                                    onValueChange={(uf)=>{
-                                        setSelectedUf(uf)
-                                        return setFieldValue('uf', uf)
-                                    }}
+                                    selectedValue={formData.uf} 
+                                    onValueChange={(uf)=> handleChange('uf', uf)}
                                 > 
                                     <Picker.Item 
                                         label="Estado" 
@@ -249,8 +312,8 @@ const CreateTrip = () => {
                             <Local>
                                 <Picker 
                                     style={{width: '100%'}}
-                                    selectedValue={values.city}
-                                    onValueChange={handleChange('city')}
+                                    selectedValue={formData.city}
+                                    onValueChange={(city)=> handleChange('city', city)}
                                 >
                                     <Picker.Item 
                                         label="Cidade"
@@ -274,10 +337,11 @@ const CreateTrip = () => {
                             <TextInputMask
                                 style={styles.input}
                                 type={'datetime'}
+                                value={formData.duration}
                                 options={{
                                     format: 'HH:mm'
                                 }}
-                                onChangeText={handleChange('duration')}
+                                onChangeText={(duration)=> handleChange('duration', duration)}
                             />
                             <ErrorMessage>
                                 {errors.duration && errors.duration}
@@ -285,9 +349,10 @@ const CreateTrip = () => {
 
                         <Label>Valor da atração por pessoa</Label>
                             <TextInputMask
+                                value={formData.value}
                                 style={styles.input}
                                 type={"only-numbers"}
-                                onChangeText={handleChange('value')}
+                                onChangeText={(value)=> handleChange('value', value)}
                             />
                             <ErrorMessage>
                                 {errors.value && errors.value}
@@ -296,21 +361,13 @@ const CreateTrip = () => {
                         <Label>Inclui na viagem:</Label>
                             <BoxInclusion>
                                 <Inclusion>
-                                    <Input 
+                                    <Input
+                                        defaultValue={include}
                                         style={{width: '90%', borderWidth: 0}}
                                         placeholder="Digite oque inclui no passeio"
                                         onChangeText={(include)=> setInclude(include)}
                                     />
-                                    <AddItem 
-                                        style={{width: '5%'}}
-                                        onPress={()=> {
-                                            setFieldValue('trips_includes', [
-                                            ...values.trips_includes, 
-                                            {name: include}
-                                            ]
-                                        )}
-                                    }
-                                    >
+                                    <AddItem style={{width: '5%'}} onPress={handleChangeInclude}>
                                         +
                                     </AddItem>
                                 </Inclusion>
@@ -320,18 +377,11 @@ const CreateTrip = () => {
                             <ErrorMessage>
                                 {errors.trips_includes && errors.trips_includes}
                             </ErrorMessage>
-                            {values.trips_includes.length > 0 && values.trips_includes.map((include)=>{
+                            {formData.trips_includes?.length > 0 && formData.trips_includes.map((include)=>{
                                 return (
                                     <Item>
-                                        <Text 
-                                            onPress={()=>{
-                                                const deleteInclude = values.trips_includes.filter((item)=>{
-                                                    return item.name != include.name
-                                                })
-                                                return setFieldValue('includes', deleteInclude)
-                                            }}
-                                        >
-                                        {include.name}
+                                        <Text onPress={handleDeleteInclude}>
+                                            {include.name}
                                         </Text>
                                     </Item>
                                 )
@@ -345,21 +395,12 @@ const CreateTrip = () => {
                                             width: '90%', 
                                             borderWidth: 0
                                         }}
+                                        defaultValue={notInclude}
                                         placeholder="Digite oque não inclui no passeio"
                                         onChangeText={(notInclude)=> setNotInclude(notInclude)}
                                         
                                     />
-                                    <AddItem
-                                        style={{
-                                            width: '5%'
-                                        }}
-                                        onPress={()=> {
-                                            setFieldValue('trips_not_includes', [
-                                                ...values.trips_not_includes, 
-                                                {name: notInclude}
-                                            ])
-                                        }}
-                                    >
+                                    <AddItem style={{width: '5%'}} onPress={handleChangeNotInclude}>
                                         +
                                     </AddItem>
                                 </NotInclusion>
@@ -368,34 +409,29 @@ const CreateTrip = () => {
                             <ErrorMessage>
                                 {errors.trips_not_includes && errors.trips_not_includes}
                             </ErrorMessage>
-                            {values.trips_not_includes.length > 0 && values.trips_not_includes.map((notInclude)=>{
+                            {formData.trips_not_includes?.length > 0 
+                            && formData.trips_not_includes.map((notInclude)=>{
                                 return (
                                     <Item>
-                                        <Text 
-                                            onPress={()=>{
-                                                const deleteNotInclude = values.trips_not_includes.filter((item)=>{
-                                                    return item.name != notInclude.name
-                                                })
-                                                return setFieldValue('trips_not_includes', deleteNotInclude)
-                                            }}
-                                        >
-                                        {notInclude.name}
-                                    </Text>
+                                        <Text onPress={handleDeleteNotInclude}>
+                                            {notInclude.name}
+                                        </Text>
                                     </Item>
                                 )
-                            })}
+                        })}
                             </BoxList>
                         <Label>Horarios disponiveis:</Label>
                         <BoxGroupSchedules>
                             <BoxSchedule>
                                 <TextInputMask
                                     style={styles.input}
+                                    value={formData.schedule_initial}
                                     type={'datetime'}
                                     options={{
                                         format: 'HH:mm'
                                     }}
                                     placeholder="Horario inicial"
-                                    onChangeText={handleChange('schedule_initial')}
+                                    onChangeText={(schedule_initial)=>handleChange('schedule_initial', schedule_initial)}
                                 />
                                 <ErrorMessage>
                                     {errors.schedule_initial && errors.schedule_initial}
@@ -404,12 +440,13 @@ const CreateTrip = () => {
                             <BoxSchedule>
                                 <TextInputMask
                                     style={styles.input}
+                                    value={formData.schedule_end}
                                     type={'datetime'}
                                     options={{
                                         format: 'HH:mm'
                                     }}
                                     placeholder="Horario final"
-                                    onChangeText={handleChange('schedule_end')}
+                                    onChangeText={(schedule_end)=>handleChange('schedule_end', schedule_end)}
                                 />
                                 <ErrorMessage>
                                     {errors.schedule_end && errors.schedule_end}
@@ -419,12 +456,7 @@ const CreateTrip = () => {
                         <Label>Dias disponiveis</Label>
                             <Picker   
                                 style={{width: '100%'}}
-                                onValueChange={((day)=>{
-                                    return setFieldValue('days_disponibles',[
-                                        ...values.days_disponibles, 
-                                        {day}
-                                    ])
-                                })}
+                                onValueChange={(day) => handleChangeDays(day)}
                             >
                                 <Picker.Item value="" label="Selecione os dias disponiveis"/>
                                 <Picker.Item value="Domingo" label="Domingo"/>
@@ -436,18 +468,12 @@ const CreateTrip = () => {
                                 <Picker.Item value="Sábado" label="Sábado"/>
                             </Picker>
                         <BoxList>
-                        {values.days_disponibles.length > 0 && values.days_disponibles.map((day)=>{
+                        {formData.days_disponibles?.length > 0 
+                        && formData.days_disponibles.map((day)=>{
                             return (
                                 <Item>
-                                    <Text 
-                                        onPress={()=>{
-                                            const deleteDay = values.days_disponibles.filter((item)=>{
-                                                return item.day != day.day
-                                            })
-                                            return setFieldValue('days', deleteDay)
-                                        }}
-                                    >
-                                    {day.day}  
+                                    <Text onPress={()=> handleDeleteDay(day.day)}>
+                                        {day.day}  
                                     </Text>
                                 </Item>
                             )
@@ -458,7 +484,7 @@ const CreateTrip = () => {
                                 title="Enviar"
                                 onPress={handleSubmit}
                             />
-                            <Link onPress={handleBackPageDashboard}>
+                            <Link onPress={()=> navigation.navigate('Passeios')}>
                                 Voltar para a página principal
                             </Link>
                         </BoxNavigation>

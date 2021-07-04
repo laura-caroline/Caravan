@@ -14,8 +14,8 @@ import DetailsTrip from './pages/DetailsTrip/index'
 import TripsSelled from './pages/Dashboard/Admin/TripsSelled/index'
 import PageNavigateSite from './pages/UpdatePassword/PageNavigateSite/index'
 // Context
-import authenticate, {useAuthenticate} from './context/authenticate'
-import {CheckOutProvider} from './context/checkout'
+import {useAuthenticate} from './context/authenticate'
+import Checkout from './pages/Home/Header/Cart/CheckoutStripe/checkout'
 
 const Routes = () => {
     const {authenticate, isAdmin} = useAuthenticate(
@@ -38,7 +38,7 @@ const Routes = () => {
             <Route exact path="/trip/" component={ListTrip}/>  
             <Route exact path='/trip/:id' component={DetailsTrip}/>
             <Route exact path="/updated" component={PageNavigateSite}/>
-            
+            <Route exact path="/payment" component={Checkout} />
             {authenticate && (
                 <>  
                     <PrivateRouter privated exact path="/user/:user/meus-passeios" component={MyTripsBuyed}/>       

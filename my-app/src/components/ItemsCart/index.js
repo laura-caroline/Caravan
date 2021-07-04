@@ -82,7 +82,7 @@ const ItemsCart = ()=>{
         <ScrollView>
         {tripsOfUser.length > 0 && tripsOfUser.map((trip, index)=>{
             return(
-                <BoxContent>
+                <BoxContent >
                     <BoxTrip>
                         <Image source={trip.image} />
                         <BoxDescription>

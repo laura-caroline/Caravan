@@ -4,9 +4,9 @@ import {ActivityIndicator} from 'react-native'
 import {CalendarList} from 'react-native-calendars'
 import api from '../../../../config/api'
 import {Picker} from '@react-native-picker/picker'
-//Contexts
+import Spinner from 'react-native-loading-spinner-overlay'
 import {useAuthenticate} from '../../../../context/authenticate'
-//** */
+
 import {
     BoxCalendar,
     BoxFilter,
@@ -35,7 +35,7 @@ import {
 } from '../../../../components/styles-list-trips'
 
 const TripsSelled = () => {
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
     const [trips, setTrips ] = useState([])
     const [isVisible, setIsVisible] = useState(false)
     const [date, setDate] = useState('')
@@ -46,7 +46,6 @@ const TripsSelled = () => {
         (async ()=>{
             const response = await api.get(`/payment`)
             const data = response.data
-            console.log(data)
             setTrips(data)
             return setLoading(false)
         })()
@@ -72,6 +71,11 @@ const TripsSelled = () => {
     return (
         <Container>
         <BoxContent style={{padding: 15}}>
+            <Spinner
+                visible={loading}
+                textContent="Loading..."
+                textStyle={{color: '#FFF'}}
+            />
             <BoxFilters>
                 <BoxFilter>
                     <Label style={{fontSize: 18}}>Escolha uma data para filtrar </Label>
@@ -90,73 +94,66 @@ const TripsSelled = () => {
                 </BoxFilter>
             </BoxFilters>
             <BoxListTrips>
-            {!loading ? (
-                <>
-                {trips.length > 0 && trips.map((item)=>{
-                    return(
-                        <BoxTrip>
-                            <Image 
-                                source={{uri: item.payment.order.trip.image}}
-                            />
-                            <BoxDescription> 
-                                <Local>
-                                    Local: {item.payment.order.trip.name}
-                                </Local>
-                                <User>
-                                    Nome do usuário: {item.payment.order.user.name}
-                                </User>
-                                <Cpf>
-                                    CPF do usuário: {item.payment.order.user.cpf}
-                                </Cpf>
-                                <BoxGroupButtons>
-                                    <BoxButton>
-                                        <Label>DATA</Label>
-                                        <Input 
-                                            value={item.date}
-                                            editable={false}
-                                        />
-                                    </BoxButton>
-                                    <BoxButton style={{width: '55%'}}>
-                                        <Label>HORARIO</Label>
-                                        <Picker 
-                                            mode="dropdown" 
-                                            editable={false}
-                                        >
-                                            <Picker.Item
-                                                label={`${item.schedule_initial} as ${item.schedule_end}`}
-                                                value={`${item.schedule_initial} as ${item.schedule_end}`}
-                                            />  
-                                        </Picker>
-                                    </BoxButton>
-                                    <BoxButton style={{width: '20%'}}>
-                                        <Label>PESSOA(s)</Label>
-                                        <Input 
-                                            value={item?.payment?.order?.numbers_people}
-                                            editable={false}
-                                        />
-                                    </BoxButton>
-                            </BoxGroupButtons> 
-                        </BoxDescription>
-                        <BoxPrice style={{padding: 15}}>
-                            <PriceTrip>
-                                Preço: R$ {item.payment.value}
-                            </PriceTrip>
-                        </BoxPrice>
-                    </BoxTrip> 
-                    ) 
-                })}
-                </>
-            ):(
-                <ActivityIndicator 
-                    animating={loading}
-                    color="gray"
-                    size="large"
-                />
-            )}
-        </BoxListTrips>
-        {trips.length <= 0 && !loading && (
-            <Error>Não houve vendas nesta data</Error>
-        )}            
+            
+            {trips.length > 0 && trips.map((item)=>{
+                return(
+                    <BoxTrip>
+                        <Image 
+                            source={{uri: item.payment.order.trip.image}}
+                        />
+                        <BoxDescription> 
+                            <Local>
+                                Local: {item.payment.order.trip.name}
+                            </Local>
+                            <User>
+                                Nome do usuário: {item.payment.order.user.name}
+                            </User>
+                            <Cpf>
+                                CPF do usuário: {item.payment.order.user.cpf}
+                            </Cpf>
+                            <BoxGroupButtons>
+                                <BoxButton>
+                                    <Label>DATA</Label>
+                                    <Input 
+                                        value={item.date}
+                                        editable={false}
+                                    />
+                                </BoxButton>
+                                <BoxButton style={{width: '55%'}}>
+                                    <Label>HORARIO</Label>
+                                    <Picker 
+                                        mode="dropdown" 
+                                        editable={false}
+                                    >
+                                        <Picker.Item
+                                            label={`${item.schedule_initial} as ${item.schedule_end}`}
+                                            value={`${item.schedule_initial} as ${item.schedule_end}`}
+                                        />  
+                                    </Picker>
+                                </BoxButton>
+                                <BoxButton style={{width: '20%'}}>
+                                    <Label>PESSOA(s)</Label>
+                                    <Input 
+                                        value={item?.payment?.order?.numbers_people}
+                                        editable={false}
+                                    />
+                                </BoxButton>
+                        </BoxGroupButtons> 
+                    </BoxDescription>
+                    <BoxPrice style={{padding: 15}}>
+                        <PriceTrip>
+                            Preço: R$ {item.payment.value}
+                        </PriceTrip>
+                    </BoxPrice>
+                </BoxTrip> 
+                ) 
+            })}
+            {trips.length <= 0 && !loading && (
+                <Error>
+                    Não houve vendas nesta data
+                </Error>
+            )}    
+        </BoxListTrips>   
         </BoxContent>
         </Container>
     )

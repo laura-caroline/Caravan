@@ -1,24 +1,30 @@
 import styled from 'styled-components'
 
-export const WrapperForm = styled.div `
+export const Container = styled.div `
     min-width: 100%;
     display: flex;
     flex-direction: column;
 
 `
-export const Form = styled.form `
-    width: 100%;
-    display: flex;
-    
+export const BoxContent = styled.div`
+    width: 90%;
+    position: relative;
 
 `
+
 export const Input = styled.input `
     width: 100%;
     padding: 10px;
     
 `
+export const Form = styled.form``
+export const ButtonSearch = styled.button`
+    cursor: pointer;
+    background: none;
+    border: none
+`
 
-export const WrapperList = styled.div `
+export const BoxPossiblesLocals = styled.div `
     width: 100%;
     min-height: 220px;
     display: none;
@@ -37,7 +43,7 @@ export const WrapperList = styled.div `
 
 `
 
-export const Error = styled.p `
+export const ErrorMessage = styled.p `
     color: red;
     position: absolute;
     top: 85px;

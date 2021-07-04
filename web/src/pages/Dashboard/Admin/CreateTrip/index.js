@@ -192,8 +192,8 @@ const CreateTrip = ({ history }) => {
                         days_disponibles: [],
                     }}
                     validationSchema={FormSchema}
-                    onSubmit={({values, setFieldError}) => {
-                        return submitForm(values, setFieldError)
+                    onSubmit={async (values, {setFieldError}) => {
+                        return await submitForm(values, setFieldError)
                     }}
                 >
                     {({ values, errors, setFieldValue, handleChange, handleSubmit }) => (

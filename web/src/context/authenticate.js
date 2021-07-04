@@ -14,13 +14,10 @@ const AuthenticateProvider = ({history,children})=>{
     
     useEffect(()=>{
         (async ()=>{
-            const getToken = localStorage.getItem(keyAuth)
-            api.defaults.headers.Authorization = `Bearer ${getToken}`
-            const response = await api.post('/verify-token-user')
+            const response = await api.post('/auth')
             const {token} = response.data
-
             if(token){
-                const dataProfile = JSON.parse(localStorage.getItem('@profiles'))
+                const dataProfile = JSON.parse(localStorage.getItem(keyProfiles))
                 const {hierarchy} = dataProfile
                 setProfile(dataProfile)
                 setAuthenticate(true)

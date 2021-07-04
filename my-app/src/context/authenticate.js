@@ -8,18 +8,18 @@ const keyProfiles = '@profiles';
 const AuthenticateContext = createContext()
 
 const AuthenticateProvider = ({children})=>{
+
     const [authenticate, setAuthenticate] = useState(false)
     const [isAdmin, setIsAdmin] = useState(false)
     const [profile, setProfile] = useState({})
     const [loading, setLoading] = useState(true)
+
     
     useEffect(()=>{
         (async ()=>{
-            const getToken = await AsyncStorage.getItem(keyAuth)
-            api.defaults.headers.Authorization = `Bearer ${getToken}`
-            const response = await api.post('/verify-token-user')
+            const response = await api.post('/auth')
             const {token} = response.data
-
+            
             if(token){
                 const data = JSON.parse(await AsyncStorage.getItem(keyProfiles))
                 setProfile(data)
@@ -69,6 +69,7 @@ const AuthenticateProvider = ({children})=>{
             handleModalLogin,
             authenticate,
             setProfile,
+            setAuthenticate,
             isAdmin,
             profile,
             
@@ -84,6 +85,7 @@ export const useAuthenticate = ()=>{
         handleLogout,
         handleAuthenticateEmail, 
         handleModalLogin, 
+        setAuthenticate,
         authenticate, 
         isAdmin,profile, 
         setProfile
@@ -94,6 +96,7 @@ export const useAuthenticate = ()=>{
         handleLogout,
         handleAuthenticateEmail,
         handleModalLogin, 
+        setAuthenticate,
         authenticate, 
         isAdmin, 
         profile, 

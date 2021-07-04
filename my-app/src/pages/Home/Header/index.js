@@ -39,26 +39,15 @@ const NavBar = () => {
     return (
         <Header>
             <BoxHeaderLeft>
-                <Text 
-                    style={{
-                        fontSize: 25, 
-                        width: '100%'
-                    }}
-                >
+                <Text style={{fontSize: 25,  width: '100%'}}>
                     CARAVAN
                 </Text>
                 <BoxSearch>
                     <Search/>
                 </BoxSearch>
             </BoxHeaderLeft>
-            <BoxHeaderRight>
+            <BoxHeaderRight style={{height: '100%',justifyContent: 'center'}}>
                 <BoxGroupButtons>
-                    <Icon 
-                        name="shopping-cart"
-                        size={30}
-                        color="black"
-                        onPress={handleClickCart}
-                    />
                     <ButtonLogin 
                         title={authenticate ? 'Meu painel' : 'Entrar'}
                         onPress={handleClickEnter}

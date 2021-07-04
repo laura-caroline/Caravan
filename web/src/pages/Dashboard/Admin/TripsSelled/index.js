@@ -35,13 +35,14 @@ const TripsSelled = () => {
     const [isVisible, setIsVisible] = useState(false)
     const [date, setDate] = useState('')
     const {profile: {idUser}} = useAuthenticate()
+    
     useEffect(()=>{
         (async ()=>{
             const response = await api.get(`/payment`)
+            console.log(response)
             const data = response.data
             return setTrips(data)
         })()
-
     }, [])
 
     const handleClickCalendar = async (date)=>{

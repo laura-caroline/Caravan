@@ -19,10 +19,8 @@ export const BoxAdvantage = styled.View`
     margin: 20px;
     border: 1px solid gray;
     box-shadow: 7px 7px gray;
+    align-items: center;
 
-    &:hover{
-        background: #ededed;
-    }
     
 `
 export const SubTitle = styled.Text`

@@ -3,6 +3,7 @@ import styled, {keyframes} from 'styled-components/native'
 
 export const Container = styled.ScrollView`
     width: 100%;
+    height: 100%;
     border: 1px solid black;
     box-shadow: 2px 2px black;
     background: white;

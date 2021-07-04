@@ -7,6 +7,16 @@ module.exports = (sequelize, DataTypes)=>{
           primaryKey: true,
           autoIncrement: true
         },
+        id_user: {
+          type: DataTypes.INTEGER,
+          references: {
+              model: 'users',
+              key: 'id'
+          },
+          onDelete: 'CASCADE',
+          onUpdate: 'CASCADE'
+
+      },
         id_order: {
           allowNull: false,
           type: DataTypes.INTEGER,
@@ -29,10 +39,13 @@ module.exports = (sequelize, DataTypes)=>{
       },
       {
         timestamps:false,
+        freezeTableName: true
       })
 
       payments.associate = (models)=>{
         payments.belongsTo(models.orders, {foreignKey: 'id_order'})
+        payments.belongsTo(models.users, {foreignKey: 'id_user'})
+
       }
       
       return payments;

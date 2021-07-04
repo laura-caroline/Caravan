@@ -3,7 +3,6 @@ import ItemsCart from '../../../../components/ItemsCart/index'
 import {withRouter} from 'react-router-dom'
 import {useCheckOut} from '../../../../context/checkout'
 import {useAuthenticate} from '../../../../context/authenticate'
-import CheckoutStripe from './CheckoutStripe/index'
 import {
     Container,
     BoxPrice,
@@ -18,7 +17,7 @@ const Cart = ({history})=>{
     const {
         authenticate, 
         isAdmin, 
-        profile: {idUser, User}
+        profile,
     } = useAuthenticate()
     
     const { 
@@ -29,11 +28,11 @@ const Cart = ({history})=>{
     useEffect(()=>{   
         if(storagedTrips){
             const findoutTripsOfUser = storagedTrips.filter((trip)=>{
-                return trip.id_user == idUser
+                return trip.id_user == profile.idUser
             })
             return setTripsOfUser(findoutTripsOfUser)
         }
-    },[storagedTrips])
+    },[profile])
     
     return(
         (authenticate ? ( 
@@ -41,7 +40,7 @@ const Cart = ({history})=>{
                 <Container show={showCheckOut}>
                     <ItemsCart/>
                     <BoxPrice>
-                        <CheckoutStripe items={tripsOfUser}/>
+                        <Button onClick={()=> history.push('/payment')}>Realizar pagamento</Button>
                     </BoxPrice>
                 </Container>
             ):(

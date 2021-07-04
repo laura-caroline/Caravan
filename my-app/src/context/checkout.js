@@ -2,6 +2,7 @@ import React, {createContext,useContext, useState, useEffect} from 'react'
 import AsyncStorage from '@react-native-community/async-storage'
 const CheckOutContext = createContext()
 const key = '@trips'
+import {Alert} from 'react-native'
 
 export const CheckOutProvider = ({children})=>{
     const [storagedTrips, setStoragedTrips] = useState([])
@@ -39,7 +40,6 @@ export const CheckOutProvider = ({children})=>{
                 ])
                 return setShowCheckOut(true)
             }
-            console.log('Atração já foi adicionada no carrinho')
         }
         await AsyncStorage.setItem(key, JSON.stringify([objTrip]))   
         setStoragedTrips([objTrip])  

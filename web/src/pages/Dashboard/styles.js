@@ -62,7 +62,7 @@ export const BoxGroupButtons = styled.div`
     min-height: 100%;
     background: #ddd;
     transform: scale(0);
-    top: 78px;
+    top: 70px;
     animation: ${AnimationScale} ${props => props.show ? '0.4s alternate forwards' : 'none'};
 
 `

@@ -25,7 +25,7 @@ export const BoxNewsletter = styled.View`
 export const Title = styled.Text` 
     width: 100%;
     color: white;
-    font-size: 20px; 
+    font-size: 15px; 
 `
 export const Description = styled.Text` 
     width: 100%;

@@ -31,10 +31,7 @@ const Newsletter = () => {
                 <Image source={images[count]} />
             </BoxCarrosel>
             <BoxNewsletter>
-                <Title>Realize a viagem do seu sonho</Title>
-                <Description>
-                    O melhor local para viajar é com a Caravan, mais de 5.000 excursões concluídas.
-                </Description>
+                <Title>Realize o passeio do seu sonho</Title>
             </BoxNewsletter>
         </Container>
     )

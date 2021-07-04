@@ -57,11 +57,12 @@ const DetailsTrip = () => {
     const [schedule, setSchedule] = useState('')
     const [trips, setTrips] = useState([])
     const [modalVisible, setModalVisible] = useState(false)
+    const [dateUTC, setDateUTC] = useState('')
     // Contexts and hooks
     const { id, name } = useParams()
     const { handleAddStoragedTrips, setShowCheckOut } = useCheckOut()
     const { authenticate, profile: { idUser } } = useAuthenticate()
-
+    
     const FormSchema = Yup.object().shape({
         dateSelected: Yup
             .string()
@@ -107,10 +108,12 @@ const DetailsTrip = () => {
     }
     const handleDateSelected = async (value) => {
         const formatDate = format(value, 'dd-MM-yyyy')
+        const formatUTC = format(value, 'yyyy-MM-dd')
         setShowCalendar(false)
-        const response = await api.get(`/trip/${id}/${formatDate}`)
+        const response = await api.get(`/trip/${id}/${formatUTC}`)
         const data = response.data
         setSchedules(data)
+        setDateUTC(formatUTC)
         return setDateSelected(formatDate)
 
     }
@@ -148,9 +151,8 @@ const DetailsTrip = () => {
             schedule,
             schedules,
             id_user: idUser,
+            date_utc: dateUTC
         })
-
-
     }
     return (
         <Container>

@@ -90,7 +90,7 @@ const MyTripsBuyed = (props) => {
                 </BoxTrips>
                 {trips.length === 0 && (
                     <WarningEmptyTrips>
-                        Não há nenhumma viagem que você efetuou o pagamento
+                        Não há nenhuma passeio que você efetuou o pagamento
                     </WarningEmptyTrips>
                 )}            
             </BoxContent>

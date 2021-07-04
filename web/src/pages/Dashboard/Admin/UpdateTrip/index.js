@@ -48,6 +48,65 @@ const UpdateTrip = ({ history }) => {
     const { profile: { User, hierarchy } } = useAuthenticate()
     const { user, id } = useParams()
 
+    const FormSchema = Yup.object().shape({
+        name: Yup
+            .string()
+            .required('Campo obrigatório')
+        ,
+        uf: Yup
+            .string()
+            .required('Campo obrigatório')
+        ,
+        city: Yup
+            .object()
+            .required('Campo obrigatório')
+        ,
+        duration: Yup
+            .string()
+            .matches(/^(\d){2}\:(\d){2}/, "Formato valido: 99:99")
+            .required('Campo obrigatório')
+        ,
+        value: Yup
+            .number()
+            .min(1, "Campo obrigatório")
+            .required('Campo obrigatório')
+        ,
+        schedule_initial: Yup
+            .string()
+            .matches(/^(\d){2}\:(\d){2}/, "Formato valido: 99:99")
+            .required('Campo obrigatório')
+        ,
+        schedule_end: Yup
+            .string()
+            .matches(/^(\d){2}\:(\d){2}/, "Formato valido: 99:99")
+            .required('Campo obrigatório')
+        ,
+        trips_includes: Yup
+            .array()
+            .of(Yup.object().shape({
+                name: Yup.string().required('Campo obrigatório')
+            })
+            )
+            .min(1, 'Campo obrigatório')
+
+        ,
+        trips_not_includes: Yup
+            .array()
+            .of(Yup.object().shape({
+                name: Yup.string().required('Campo obrigatório')
+            })
+            )
+            .min(1, 'Campo obrigatório')
+        ,
+        days_disponibles: Yup
+            .array()
+            .of(Yup.object().shape({
+                day: Yup.string().required('Campo obrigatório')
+            })
+            )
+            .min(1, 'Campo obrigatório')
+        ,
+    })
     useEffect(() => {
         (async () => {
             const response = await api.get(`/trip/${id}`)
@@ -72,7 +131,7 @@ const UpdateTrip = ({ history }) => {
 
     useEffect(() => {
         (async () => {
-            if (formData.uf && ufs.length > 0) {
+            if (ufs.length > 0) {
                 const findoutSiglaUf = ufs.find((uf) => {
                     return uf.nome == formData.uf
                 })
@@ -85,13 +144,10 @@ const UpdateTrip = ({ history }) => {
                 return setCitys(ordenedCitys)
             }
         })()
-    }, [ufs])
+    }, [ufs || formData.uf])
 
     const handleChange = (event) => {
-        const { 
-            value, 
-            name 
-        } = event.target
+        const {value, name } = event.target
         return setFormData({ ...formData, [name]: value })
     }
 
@@ -162,53 +218,54 @@ const UpdateTrip = ({ history }) => {
         setLoading(true)
         try {
             const valid = await FormSchema.validate(formData, { abortEarly: false })
+
+            const {
+                city,
+                name,
+                days_disponibles,
+                image,
+                trips_includes,
+                trips_not_includes,
+                uf,
+                value,
+                duration,
+                schedule_initial,
+                schedule_end
+            } = formData
+
+            const form = new FormData()
+
+            form.append('city', city)
+            form.append('image', image)
+            form.append('name', name)
+            form.append('duration', parsedTime(duration))
+            form.append('value', value)
+            form.append('schedule_initial', parsedTime(schedule_initial))
+            form.append('schedule_end', parsedTime(schedule_end))
+            form.append('uf', uf)
+            form.append('days_disponibles', JSON.stringify(days_disponibles))
+            form.append('trips_includes', JSON.stringify(trips_includes))
+            form.append('trips_not_includes', JSON.stringify(trips_not_includes))
+            form.append('id_product', formData.id_product)
+            form.append('id_price', formData.id_price)
+
+            const response = await api.put(`/trip/${id}`, form)
+            const data = response.data
+            setLoading(false)
+
+            if(response.status === 200){
+                if (hierarchy === 'admin') {
+                return history.push(`/user/${User}/passeios`)
+                }
+                else {
+                return history.push(`/user/${User}/meus-passeios`)
+                }
+            }
         }
         catch (errors) {
             setLoading(false)
             const schemaErrors = errors.inner.reduce((obj, item) => ((obj[item.path] = item.message), obj), {});
             return setErrors(schemaErrors)
-        }
-        const {
-            city,
-            name,
-            days_disponibles,
-            image,
-            trips_includes,
-            trips_not_includes,
-            uf,
-            value,
-            duration,
-            schedule_initial,
-            schedule_end
-        } = formData
-
-        const form = new FormData()
-
-        form.append('city', city)
-        form.append('image', image)
-        form.append('name', name)
-        form.append('duration', parsedTime(duration))
-        form.append('value', value)
-        form.append('schedule_initial', parsedTime(schedule_initial))
-        form.append('schedule_end', parsedTime(schedule_end))
-        form.append('uf', uf)
-        form.append('days_disponibles', JSON.stringify(days_disponibles))
-        form.append('trips_includes', JSON.stringify(trips_includes))
-        form.append('trips_not_includes', JSON.stringify(trips_not_includes))
-        form.append('id_product', formData.id_product)
-        form.append('id_price', formData.id_price)
-
-        const response = await api.put(`/trip/${id}`, form)
-        const data = response.data
-        setLoading(false)
-
-        if(response.status === 200){
-            if (hierarchy === 'admin') {
-               return history.push(`/user/${User}/passeios`)
-            }
-            else {
-               return history.push(`/user/${User}/meus-passeios`)
-            }
         }
         
 

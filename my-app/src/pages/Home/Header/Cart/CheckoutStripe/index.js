@@ -1,38 +1,49 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../../../../config/api'
-import { Button, View } from 'react-native'
+import { Button, Alert } from 'react-native'
 import {useRoute} from '@react-navigation/native'
-import {useStripe, initStripe, StripeProvider } from '@stripe/stripe-react-native';
-import { fetchPublishableKey } from './helpers';
+import {useStripe, StripeProvider } from '@stripe/stripe-react-native';
+import {format} from 'date-fns'
+import {parsedTime} from '../../../../../utils/parsedTime'
 
 
 
-const CheckoutStripe = () => {
-    const { initPaymentSheet, presentPaymentSheet } = useStripe()
-    const [paymentSheetEnabled, setPaymentSheetEnabled] = useState(false)
+const CheckoutStripe = ({items}) => {
+    const {initPaymentSheet, presentPaymentSheet } = useStripe()
     const [loading, setLoading] = useState(false)
     const [clientSecret, setClientSecret] = useState('')
     const [tripsStripe, setTripsStripe] = useState([])
-
-    const {items} = useRoute().params
-
+    const [tripsDatabase, setTripsDatabase] = useState([])
     
     useEffect(() => {
         if(items){
-            const modified = items.map((trip) => {
+            const modifiedForDatabase = items.map((trip) => {
+                return {
+                    id_user: trip.id_user,
+                    id_trip: trip.id_trip,
+                    numbers_people: trip.numbers_people,
+                    schedule_initial: parsedTime(trip.schedules[0]?.schedule_initial),
+                    schedule_end: parsedTime(trip.schedules[0]?.schedule_end),
+                    date: trip.date_utc,
+                    value: trip.value
+                }
+            })
+            setTripsDatabase(modifiedForDatabase)
+
+            const modifiedForStripe = items.map((trip) => {
                 return {
                     price: trip.id_price,
                     quantity: parseInt(trip.numbers_people)
                 }
             })
-            return setTripsStripe(modified)
+            return setTripsStripe(modifiedForStripe)
         }
-        
     }, [items])
 
     const fetchPaymentSheetParams = async () => {
         const response = await api.post('/payment-sheet', {itemsStripe: tripsStripe, all: items})
         const { paymentIntent, ephemeralKey, customer } = response.data
+        
         setClientSecret(paymentIntent);
         return {
             paymentIntent,
@@ -45,18 +56,17 @@ const CheckoutStripe = () => {
         if (!clientSecret) {
           return;
         }
-        setLoading(true);
+        setLoading(false);
         const { error } = await presentPaymentSheet({
           clientSecret,
         })
     
-        if (error) {
-          Alert.alert(`Error code: ${error.code}`, error.message);
-        } else {
-          Alert.alert('Success', 'The payment was confirmed successfully');
+        if (!error) {
+            const response = await api.post('/payment', {data: tripsDatabase})
+            if(response.status === 200){
+                Alert.alert('Success', 'Pagamento realizado com sucesso');
+            }
         }
-        setPaymentSheetEnabled(false);
-        setLoading(false);
     }
 
     const initialisePaymentSheet = async () => {
@@ -70,14 +80,10 @@ const CheckoutStripe = () => {
             customerId: customer,
             customerEphemeralKeySecret: ephemeralKey,
             paymentIntentClientSecret: paymentIntent,
-            customFlow: false,
-            style: 'alwaysDark',
+            
+            
         })
-
-        console.log(error)
-        if (!error) {
-            setPaymentSheetEnabled(true);
-        }
+        setLoading(true)
     }
 
     useEffect(()=>{
@@ -88,9 +94,8 @@ const CheckoutStripe = () => {
         <StripeProvider publishableKey="pk_test_51J4vDPC7VwF1036srn6kXrqU2qMkvq6WEXJap1XPDZRhy4xYUsjFMzbGSQrJPpzzI2uijjyNUb6bn3Ue1ruZNVcY00g1RXVTeP">
             <Button 
                 variant="primary"
-                loading={loading}   
-                disabled={!paymentSheetEnabled}
-                title="Checkout"
+                loading={loading}
+                title="Realizar pagamento"
                 onPress={openPaymentSheet}
                 />
         </StripeProvider>

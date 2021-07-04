@@ -17,7 +17,5 @@ export const Input = styled.TextInput`
 `
 
 export const BoxList = styled.ScrollView`
-    width: 100%;    
-    height: 200px;
-    overflow: visible;
+    width: 100%;
 `

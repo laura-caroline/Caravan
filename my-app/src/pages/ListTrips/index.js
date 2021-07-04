@@ -1,7 +1,9 @@
-import React, { useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 import api from '../../config/api'
-import {useRoute} from '@react-navigation/native'
-import {useNavigation} from '@react-navigation/native'
+import { useRoute } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
+import {Text} from 'react-native'
+import Spinner from 'react-native-loading-spinner-overlay'
 import {
     Container,
     BoxListTrips,
@@ -14,32 +16,34 @@ import {
     Duration,
     Value,
 } from '../../components/styles-list-trips'
-import { ActivityIndicator } from 'react-native'
 
-const ListTrips = ()=>{
+const ListTrips = () => {
     // Datas from/for form
     const [loading, setLoading] = useState(true)
     const [trips, setTrips] = useState([])
     // Hooks 
     const navigation = useNavigation()
-    const route = useRoute()
-    const {trip_uf, trip_county, trip_query} = route.params
-
-    useEffect(()=>{
-        (async ()=>{ 
-            if(trip_uf){
+    const { 
+        trip_uf, 
+        trip_city, 
+        trip_query 
+    } = useRoute().params
+    
+    useEffect(() => {
+        (async () => {
+            if (trip_uf) {
                 const response = await api.get(`/trip?uf=${trip_uf}`)
                 const data = response.data
                 setLoading(false)
                 return setTrips(data)
             }
-            if(trip_county){
-                const response = await api.get(`/trip?c=${trip_county}`)
+            if (trip_city) {
+                const response = await api.get(`/trip?c=${trip_city}`)
                 const data = response.data
                 setLoading(false)
                 return setTrips(data)
             }
-            if(trip_query){ 
+            if (trip_query) {
                 const response = await api.get(`/trip?q=${trip_query}`)
                 const data = response.data
                 setLoading(false)
@@ -49,49 +53,50 @@ const ListTrips = ()=>{
             const data = response.data
             setLoading(false)
             return setTrips(data)
-            
         })()
-    },[])
-    
-    const handleNavigateDetailsTrip = (id)=>{
-        return navigation.navigate('DetailsTrip', {idTrip: id})
+    }, [])
+
+    const handleNavigateDetailsTrip = (id) => {
+        return navigation.navigate('DetailsTrip', { idTrip: id })
     }
-    return(
-        <>
-        {!loading ? (
-            <Container>
-                <BoxListTrips>
-                    {trips.length > 0 && trips.map((trip)=>{
-                        return(
-                            <BoxTrip>
-                            <Image 
-                                source={trip.data.image}
+    return (
+        <Container>
+            <Spinner
+                visible={loading}
+                textContent="Loading..."
+                textStyle={{color: '#FFF'}}
+            />
+            <BoxListTrips>
+            {trips.length > 0 ? trips.map((trip) => {
+                return (
+                    <BoxTrip>
+                        <Image
+                            source={{uri: trip.data.image}}
+                        />
+                        <BoxDescription>
+                            <Local>{trip.data.name} - {trip.data.uf}</Local>
+                            <Schedule>
+                                Horario disponivel: {trip.schedule_initial} até as {trip.schedule_end}
+                            </Schedule>
+                            <Duration>
+                                Duração: {trip.duration} horas
+                            </Duration>
+                            <Value>
+                                Valor: {trip.data.value} R$
+                            </Value>
+                            <Button
+                                title="Saiba mais"
+                                onPress={() => handleNavigateDetailsTrip(trip.data.id)}
                             />
-                            <BoxDescription>
-                                <Local>{trip.data.name} - {trip.data.uf}</Local>
-                                <Schedule>
-                                    Horario disponivel: {trip.schedule_initial} até as {trip.schedule_end}
-                                </Schedule>
-                                <Duration>
-                                    Duração: {trip.duration} horas
-                                </Duration>
-                                <Value> 
-                                    Valor: {trip.data.value} R$
-                                </Value>
-                                <Button 
-                                    title="Saiba mais"
-                                    onPress={()=> handleNavigateDetailsTrip(trip.data.id)}
-                                />
-                            </BoxDescription>
-                        </BoxTrip>
-                        )
-                    })}
-                </BoxListTrips>
-            </Container>
-        ):(
-            <ActivityIndicator animating={loading} color="gray" size="large"/>
-        )}
-       </>
+                        </BoxDescription>
+                    </BoxTrip>
+                )
+            }):(
+                <Text style={{color: 'red'}}>Não tem passeios disponiveis</Text>
+            )}
+            </BoxListTrips>
+        </Container>
+
     )
 }
 export default ListTrips

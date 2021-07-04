@@ -21,3 +21,6 @@ app.use('/uploads', express.static(path.resolve(__dirname, '..','uploads')))
 app.listen(8080, ()=>{
     console.log('server online')
 })
+
+
+module.exports = app
