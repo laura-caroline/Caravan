@@ -25,8 +25,9 @@ const AuthenticateProvider = ({children})=>{
                 setProfile(data)
                 setAuthenticate(true)
                 if(data.hierarchy === 'admin'){
-                    setIsAdmin(true)
+                    return setIsAdmin(true)
                 }
+                return setIsAdmin(false)
             }
             return setLoading(false)
         })()
@@ -40,6 +41,7 @@ const AuthenticateProvider = ({children})=>{
         if(data.hierarchy === 'admin'){
             return setIsAdmin(true)
         }
+        return setIsAdmin(false)
     }
 
     const handleLogout = async ()=>{
