@@ -36,7 +36,7 @@ listando passeios, realizando compras etc
     - Stripe
 ### Clonando o projeto:
 
-1. Clone este reposítório via terminal usando git clone https://github.com/laura-caroline/Chat.git
+1. Clone este reposítório via terminal usando git clone https://github.com/laura-caroline/Caravan.git
 2. Acesse a pasta do projeto.
 
 ### Iniciando o React(web):
