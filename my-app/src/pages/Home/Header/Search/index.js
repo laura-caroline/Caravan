@@ -19,7 +19,15 @@ const Search = () => {
     const [query, setQuery] = useState('')
 
     const navigation = useNavigation()
-
+     
+    useEffect(()=>{
+      const unsubscribe = navigation.addListener('blur', ()=>{
+            setPossiblesCitys([])
+            setPossiblesUfs([])
+            setQuery('')
+        })
+    },[navigation])
+     
     useEffect(() => {
         (async()=>{
             const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
@@ -79,6 +87,7 @@ const Search = () => {
             <Form>
                 <View style={{width: '100%', flexDirection: 'row', borderWidth: 1}}>
                     <Input
+                        value={query}
                         style={{width: '90%', borderWidth: 0}}
                         onChangeText={(v)=>handleChange(v)}
                     />
