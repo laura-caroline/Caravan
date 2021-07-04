@@ -1,10 +1,9 @@
 
-### App Atrações Turisticas              
+### Caravan          
 
 ### Descrição:
-Trata-se de uma aplicação que visa listar as atrações turisticas para o usuário de uma maneira mais facil
-e gerenciar esses pagamentos.
-
+Trata-se de uma aplicação que visa fazer a gestão de passeios turisticos,
+listando passeios, realizando compras etc
 
 **Front-end:** React.js
 
@@ -21,6 +20,7 @@ e gerenciar esses pagamentos.
     - Styled Components
     - Input Mask
     - Date Fns
+    - Stripe
     
 
 ### Alguns recursos utilizados no Node.js:
@@ -33,7 +33,7 @@ e gerenciar esses pagamentos.
     - JWT
     - Nodemailer
     - Date Fns
-    
+    - Stripe
 ### Clonando o projeto:
 
 1. Clone este reposítório via terminal usando git clone https://github.com/laura-caroline/Chat.git
