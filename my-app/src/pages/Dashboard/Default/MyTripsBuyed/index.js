@@ -66,6 +66,7 @@ const MyTripsBuyed = () => {
                         <BoxButton style={{width: '25%'}}>
                             <Label>Data:</Label>
                             <Input 
+                                style={{borderWidth: 0}}
                                 value={item.date}
                                 editable={false}
                             />
@@ -83,9 +84,7 @@ const MyTripsBuyed = () => {
                         </BoxButton>
                         <BoxButton style={{width: '20%'}}> 
                             <Label>Pessoas:</Label>
-                            <Input 
-                                value={item.payment.order.numbers_people}
-                            />
+                            <Text style={{textAlign: 'center'}}>{item.payment.order.numbers_people}</Text>
                         </BoxButton>
                     </BoxGroupButtons>
                     <Button 
