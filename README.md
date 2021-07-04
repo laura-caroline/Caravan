@@ -3,7 +3,7 @@
 
 ### Descrição:
 Trata-se de uma aplicação que visa fazer a gestão de passeios turisticos,
-listando passeios, realizando compras etc
+criando passeios , listando passeios, realizando compras etc
 
 **Front-end:** React.js
 
