@@ -2,7 +2,7 @@
 ### Caravan          
 
 ### Descrição:
-Trata-se de uma aplicação que visa fazer a gestão de passeios turisticos,
+Trata-se de uma aplicação que visa a gestão de passeios turisticos,
 criando passeios , listando passeios, realizando compras etc
 
 **Front-end:** React.js
